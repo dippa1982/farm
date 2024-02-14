@@ -91,20 +91,7 @@ class Game:
     def show_funds(self):
         print(f"You have £{self.money} left in your account")
 
-    def manage_animals(self):
-        print("\n Animal Management:")
-        animal_menu = ["Buy Animal","Feed Animal","Butcher Animal"]
-        for idx,option in enumerate(animal_menu, start=1):
-            print(f"{idx}.{option}")
-        try:
-            option_selected = int(input("What do you want to do: "))
-            if option_selected == 1:
-                pass
-            else:
-                print("Invalid selection. Please choose a valid option.")
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-
+    # <editor-fold desc="Fields">
     def manage_fields(self):
         print("\nField Management:")
         field_menu = ["Buy Field","Field Progress","Plant Fields","Harvest Field","Back to Main Menu"]
@@ -207,6 +194,78 @@ class Game:
                 return
         except ValueError:
             print("Invalid input. Please enter a number.")
+    # </editor-fold>
+
+    def manage_animals(self):
+        print("\n Animal Management:")
+        animal_menu = ["Buy Animal","Feed Animal","Butcher Animal","Show Animals","Go back"]
+        for idx,option in enumerate(animal_menu, start=1):
+            print(f"{idx}.{option}")
+        try:
+            option_selected = int(input("What do you want to do: "))
+            if option_selected == 1:
+                self.buy_animals()
+            elif option_selected == 2:
+                self.feed_animals()
+            elif option_selected == 4:
+                self.show_animals()
+            elif option_selected == 5:
+                return
+            else:
+                print("Invalid selection. Please choose a valid option.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+    def show_animals(self):
+        if not self.animals:
+            print("You don't own any Animals yet.")
+        else:
+            print("\nList of Animals:")
+            for i, animal in enumerate(self.animals, start=1):
+                print(f"Animal {i}: {animal.animal_type}\nAge: {animal.age}\n{animal.progress_bar()}\n{animal.hunger}")
+
+    def feed_animals(self):
+        if not self.animals:
+            print("You dont have any animals to feed.")
+        else:
+            print("\nList of Animals:")
+            for i, animal in enumerate(self.animals, start=1):
+                print(f"{i}. {animal.animal_type}")
+                try:
+                    animal_index = int(input("Choose a animal to fed (enter the animal number): "))
+                    if animal_index < 1 or animal_index > len(self.animals):
+                        print("Invalid animal.")
+                        return
+                    chosen_animal = self.animals[animal_index - 1]
+                    chosen_animal.feed()
+                except ValueError:
+                    print("Invalid input. Please enter a number.")
+
+    def buy_animals(self):
+        print("\nYou're buying a new animal.")
+        animal_type = ["Cow","Pig"]
+        for idx,option in enumerate(animal_type, start=1):
+            print(f"{idx}.{option}")
+        option_selected = int(input("What do you want to buy: "))
+        animal_cost = 200
+        if option_selected == 1:
+            if self.money >= animal_cost:
+                self.money -= animal_cost
+                new_animal = Animals(age=1,animal_type="Cow")
+                new_animal.reduce_hunger()
+                self.animals.append(new_animal)
+                print(f"{new_animal.animal_type} purchased successfully!")
+                print(f"Funds reduced by {animal_cost} and your bank account is now {self.money}")
+        elif option_selected == 2:
+            if self.money >= animal_cost:
+                self.money -= animal_cost
+                new_animal = Animals(age=1, animal_type="Pig")
+                new_animal.reduce_hunger()
+                self.animals.append(new_animal)
+                print(f"{new_animal.animal_type} purchased successfully!")
+                print(f"Funds reduced by {animal_cost} and your bank account is now {self.money}")
+        else:
+            print("Not enough money to buy an Animal.")
 
 if __name__ == "__main__":
     game = Game()
