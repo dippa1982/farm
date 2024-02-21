@@ -6,21 +6,42 @@ class Animals:
         self.hunger = hunger
         self.animal_type = animal_type
         self.last_fed_time = datetime.now()
+        self.last_milk_time = datetime.now()
+        self.last_age_increment_time = datetime.now()
 
     def milk(self):
         if self.animal_type == "Cow":
-            print("Milking Cow")
+            current_time = datetime.now()
+            milk_time = current_time - timedelta(hours=1)
+            if milk_time >= self.last_milk_time:
+                print("Milking Cow")
+                self.last_milk_time = current_time
+            else:
+                print("Cow not ready for milking")
         else:
-            print("Cant milk this animal type")
-
-    def butcher(self):
-        pass
+            print("No cows to milk")
 
     def age_one_year(self):
-        self.age += 1
-        print(f"The {self.animal_type} is now {self.age} year(s) old.")
-        if self.age >= 10:
-            self.die()
+        current_time = datetime.now()
+        one_hour_ago = current_time - timedelta(minutes=20)
+        if one_hour_ago >= self.last_age_increment_time:
+            self.age += 1
+            self.last_age_increment_time = current_time
+            if self.age >= 10:
+                self.die()
+
+    def butcher(self):
+        if self.animal_type == "Cow":
+            meat_amount = 50  # Adjust as needed
+            print(f"Butchering {meat_amount}kg of beef from the cow.")
+            return meat_amount
+        elif self.animal_type == "Pig":
+            meat_amount = 30  # Adjust as needed
+            print(f"Butchering {meat_amount}kg of pork from the pig.")
+            return meat_amount
+        else:
+            print("Cannot butcher this animal type.")
+            return 0
 
     def feed(self):
         if self.hunger <= 30:

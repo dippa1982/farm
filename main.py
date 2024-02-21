@@ -1,7 +1,6 @@
 import os
 import random
 import time
-
 from Field import Field
 from Animals import Animals
 from datetime import datetime
@@ -22,6 +21,7 @@ class Game:
         self.fields = [] #List of field objects
         self.animals = [] #List of animal objects
         self.money = 10000  # Starting money
+        self.inventory = {'beef': 0, 'pork': 0, 'milk':0} #Inventory
 
     def start(self):
         print("Welcom to Farm Life 2024")
@@ -76,7 +76,6 @@ class Game:
                 print("Invalid input. Please enter a number.")
 
     def game_menu(self):
-        clear_screen()
         print("\nMain Menu:")
         menu = ["Save Game", "Load Game","Go to Game Menu", "Quit"]
         for idx, option in enumerate(menu, start=1):
@@ -98,7 +97,6 @@ class Game:
             print("Invalid input. Please enter a number.")
 
     def show_funds(self):
-        clear_screen()
         print(f"You have £{self.money} left in your account")
 
     def manage_fields(self):
@@ -124,7 +122,6 @@ class Game:
             print("Invalid input. Please enter a number.")
 
     def buy_field(self):
-        clear_screen()
         print("\nYou're buying a field.")
         field_cost = 2000
         if self.money >= field_cost:
@@ -137,7 +134,6 @@ class Game:
             print("Not enough money to buy the field.")
 
     def show_fields(self):
-        clear_screen()
         if not self.fields:
             print("You don't own any fields yet.")
         else:
@@ -147,7 +143,6 @@ class Game:
                 print(f"Field {i}: {field.name}: {field.crop_type}: {field.growtime}: {field.progress_bar()}")
 
     def plant_crops(self):
-        clear_screen()
         if not self.fields:
             print("You don't own any fields yet.")
             return
@@ -191,7 +186,6 @@ class Game:
 
     def harvest_field(self):
         random_event = random.randint(1,10)
-        clear_screen()
         if not self.fields:
             print("You don't own any fields yet.")
             return
@@ -221,9 +215,8 @@ class Game:
             print("Invalid input. Please enter a number.")
 
     def manage_animals(self):
-        clear_screen()
         print("\n Animal Management:")
-        animal_menu = ["Buy Animal","Feed Animal","Send to Butcher","Show Animals","Go back"]
+        animal_menu = ["Buy Animal","Feed Animal","Meat Processing","Milk Cows","Show Animals","Inventory","Sell to butcher","Go back"]
         for idx,option in enumerate(animal_menu, start=1):
             print(f"{idx}.{option}")
         try:
@@ -233,10 +226,18 @@ class Game:
             elif option_selected == 2:
                 self.feed_animals()
             elif option_selected == 3:
-                return
+                self.process_butchering()
             elif option_selected == 4:
-                self.show_animals()
+                self.milk_cows()
             elif option_selected == 5:
+                self.show_animals()
+            elif option_selected == 6:
+                self.show_inventory()
+            elif option_selected == 7:
+                self.sell_to_butcher("beef", 50)
+                self.sell_to_butcher("pork", 30)
+                self.sell_to_butcher("milk", 100)
+            elif option_selected == 8:
                 return
             else:
                 print("Invalid selection. Please choose a valid option.")
@@ -244,19 +245,74 @@ class Game:
             print("Invalid input. Please enter a number.")
 
     def show_animals(self):
-        clear_screen()
         if not self.animals:
             print("You don't own any Animals yet.")
         else:
             print("\nList of Animals:")
             for i, animal in enumerate(self.animals, start=1):
                 animal.reduce_hunger()
+                animal.age_one_year()
                 print(f"Animal {i}: {animal.animal_type} || Age: {animal.age} || Hunger: {animal.progress_bar()}")
                 if animal.hunger <= 0:
                     self.animals.remove(animal)
 
+    def milk_cows(self):
+        if not self.animals:
+            print("You don't own any Animals yet.")
+        else:
+            print("\nList of Animals:")
+            for i,animal in enumerate(self.animals, start=1):
+                animal.milk()
+                self.inventory['milk'] += 100
+
+    def process_butchering(self):
+        if not self.animals:
+            print("You don't own any Animals yet.")
+        else:
+            print("\nList of Animals:")
+            for i,animal in enumerate(self.animals, start=1):
+                meat_amount = animal.butcher()
+                if animal.animal_type == "Cow":
+                    self.inventory['beef'] += meat_amount
+                    self.animals.remove(animal)
+                elif animal.animal_type == "Pig":
+                    self.inventory['pork'] += meat_amount
+                    self.animals.remove(animal)
+
+    def sell_to_butcher(self, item, quantity):
+        butcher_price = 10  # Price per unit
+        maid_price = 2
+        if item == 'beef':
+            if self.inventory.get(item, 0) >= quantity:
+                total_price = butcher_price * quantity
+                self.money += total_price
+                self.inventory[item] -= quantity
+                print(f"You sold {quantity} units of {item} to the butcher for £{total_price}.")
+                print(f"Your new balance: £{self.money}")
+            else:
+                print("You don't have enough beef to sell.")
+        elif item == 'pork':
+            if self.inventory.get(item, 0) >= quantity:
+                total_price = butcher_price * quantity
+                self.money += total_price
+                self.inventory[item] -= quantity
+                print(f"You sold {quantity} units of {item} to the butcher for £{total_price}.")
+                print(f"Your new balance: £{self.money}")
+            else:
+                print("You don't have enough pork to sell.")
+        elif item == 'milk':
+            if self.inventory.get(item, 0) >= quantity:
+                total_price = maid_price * quantity
+                self.money += total_price
+                self.inventory[item] -= quantity
+                print(f"You sold {quantity} units of {item} to the Milk man for £{total_price}.")
+                print(f"Your new balance: £{self.money}")
+            else:
+                print("You don't have enough milk to sell.")
+        else:
+            print("The butcher doesn't buy that item.")
+
     def feed_animals(self):
-        clear_screen()
         if not self.animals:
             print("You dont have any animals to feed.")
         else:
@@ -274,7 +330,6 @@ class Game:
                     print("Invalid input. Please enter a number.")
 
     def buy_animals(self):
-        clear_screen()
         print("\nYou're buying a new animal.")
         animal_type = ["Cow","Pig"]
         for idx,option in enumerate(animal_type, start=1):
@@ -297,6 +352,11 @@ class Game:
                 print(f"Funds reduced by {animal_cost} and your bank account is now {self.money}")
         else:
             print("Not enough money to buy an Animal.")
+
+    def show_inventory(self):
+        print("Inventory:")
+        for meat, quantity in self.inventory.items():
+            print(f"{meat.capitalize()}: {quantity}kg")
 
 if __name__ == "__main__":
     game = Game()
