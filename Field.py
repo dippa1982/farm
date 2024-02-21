@@ -11,13 +11,18 @@ class Field:
     def plant_crops(self, crop_type):
         self.crop_type = crop_type
         self.plant_time = datetime.now()
-        # Set growtime based on crop type
         if crop_type == "Wheat":
             self.growtime = 200
-            self.value = 100
         elif crop_type == "Corn":
             self.growtime = 100
-            self.value == 50
+        elif crop_type == "Canola":
+            self.growtime = 400
+        elif crop_type == "Barley":
+            self.growtime = 50
+        elif crop_type == "Potatoes":
+            self.growtime = 600
+        elif crop_type == "Grapes":
+            self.growtime = 200
         else:
             self.growtime = 0
 
@@ -36,17 +41,13 @@ class Field:
     def random_event(self):
         event_option = random.randint(1,2)
         if event_option == 1:
-            field_chance = random.randint(1, 10)
-            if field_chance >= 1 and field_chance <= 3:
-                print("A swarm of locusts attacks your crops, killing them all off. Field is destroyed")
-                self.plant_time = None
-                self.crop_type = None
+            print("A swarm of locusts attacks your crops, killing them all off. Field is destroyed")
+            self.plant_time = None
+            self.crop_type = None
         elif event_option == 2:
-            field_chance = random.randint(1, 10)
-            if field_chance >= 1 and field_chance <= 3:
-                print("Its rained and flooded all your crops, Field is destroyed")
-                self.plant_time = None
-                self.crop_type = None
+            print("Its rained and flooded all your crops, Field is destroyed")
+            self.plant_time = None
+            self.crop_type = None
 
     def progress_bar(self):
         if self.plant_time is None:

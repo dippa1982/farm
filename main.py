@@ -1,5 +1,7 @@
 import os
 import random
+import time
+
 from Field import Field
 from Animals import Animals
 from datetime import datetime
@@ -10,6 +12,10 @@ class DateTimeEncoder(json.JSONEncoder):
         if isinstance(obj, datetime):
             return obj.isoformat()
         return super().default(obj)
+
+def clear_screen():
+    time.sleep(2)
+    os.system("cls")
 
 class Game:
     def __init__(self):
@@ -25,6 +31,7 @@ class Game:
     def save_game(self,filename):
         game_state = {
             "fields":[field.__dict__ for field in self.fields],
+            "animals":[animal.__dict__ for animla in self.animals],
             "money":self.money
         }
         with open(filename,"w") as file:
@@ -36,6 +43,7 @@ class Game:
             with open(filename, 'r') as file:
                 game_state = json.load(file)
                 self.fields = []
+                self.animals = []
                 for field_data in game_state['fields']:
                     field_data['plant_time'] = datetime.fromisoformat(field_data['plant_time']) if field_data['plant_time'] else None
                     self.fields.append(Field(**field_data))
@@ -68,6 +76,7 @@ class Game:
                 print("Invalid input. Please enter a number.")
 
     def game_menu(self):
+        clear_screen()
         print("\nMain Menu:")
         menu = ["Save Game", "Load Game","Go to Game Menu", "Quit"]
         for idx, option in enumerate(menu, start=1):
@@ -89,9 +98,9 @@ class Game:
             print("Invalid input. Please enter a number.")
 
     def show_funds(self):
+        clear_screen()
         print(f"You have £{self.money} left in your account")
 
-    # <editor-fold desc="Fields">
     def manage_fields(self):
         print("\nField Management:")
         field_menu = ["Buy Field","Field Progress","Plant Fields","Harvest Field","Back to Main Menu"]
@@ -115,6 +124,7 @@ class Game:
             print("Invalid input. Please enter a number.")
 
     def buy_field(self):
+        clear_screen()
         print("\nYou're buying a field.")
         field_cost = 2000
         if self.money >= field_cost:
@@ -127,6 +137,7 @@ class Game:
             print("Not enough money to buy the field.")
 
     def show_fields(self):
+        clear_screen()
         if not self.fields:
             print("You don't own any fields yet.")
         else:
@@ -136,6 +147,7 @@ class Game:
                 print(f"Field {i}: {field.name}: {field.crop_type}: {field.growtime}: {field.progress_bar()}")
 
     def plant_crops(self):
+        clear_screen()
         if not self.fields:
             print("You don't own any fields yet.")
             return
@@ -148,7 +160,7 @@ class Game:
             if field_index < 1 or field_index > len(self.fields):
                 print("Invalid field number.")
                 return
-            crop_types = ["Wheat", "Corn"]
+            crop_types = ["Wheat", "Corn","Canola","Barley","Potatoes","Grapes"]
             print("Select the crop type:")
             for idx, option in enumerate(crop_types, start=1):
                 print(f"{idx}. {option}")
@@ -159,9 +171,18 @@ class Game:
             chosen_field = self.fields[field_index - 1]
             crop_type = crop_types[crop_type_index - 1]
             if crop_type == "Wheat":
-                new_field = Field(name="Wheat Field",growtime=200,value=100,crop_type="Wheat")
+                new_field = Field(name="Wheat Field",growtime=100,value=100,crop_type="Wheat")
             elif crop_type == "Corn":
-                new_field = Field(name="Corn Field", growtime=100, value=100,crop_type="Corn")
+                new_field = Field(name="Corn Field", growtime=100, value=75,crop_type="Corn")
+            elif crop_type == "Canola":
+                new_field = Field(name="Canola Field", growtime=400, value=400,crop_type="Canola")
+            elif crop_type == "Barley":
+                new_field = Field(name="Barley Field", growtime=50, value=50,crop_type="Barley")
+            elif crop_type == "Potatoes":
+                new_field = Field(name="Potato Field", growtime=600, value=1000,crop_type="Potatoes")
+            elif crop_type == "Grapes":
+                new_field = Field(name="Grapes Field", growtime=200, value=200,crop_type="Corn")
+
             chosen_field.plant_crops(new_field.crop_type)
             print(f"You planted {crop_type} in {chosen_field.name}.")
             print(f"Growth time for {new_field.name}: {new_field.growtime} seconds")
@@ -169,6 +190,8 @@ class Game:
             print("Invalid input. Please enter a number.")
 
     def harvest_field(self):
+        random_event = random.randint(1,10)
+        clear_screen()
         if not self.fields:
             print("You don't own any fields yet.")
             return
@@ -182,7 +205,9 @@ class Game:
                 return
             chosen_field = self.fields[field_index - 1]
             if chosen_field.is_ready_to_harvest():
-                chosen_field.random_event()
+                if random_event >=1 or random_event <=3:
+                    chosen_field.random_event()
+                    return
                 print("Field ready to harvest")
                 harvested_value = chosen_field.harvest()
                 print(f"You harvested {field.crop_type} from {field.name}.")
@@ -194,11 +219,11 @@ class Game:
                 return
         except ValueError:
             print("Invalid input. Please enter a number.")
-    # </editor-fold>
 
     def manage_animals(self):
+        clear_screen()
         print("\n Animal Management:")
-        animal_menu = ["Buy Animal","Feed Animal","Butcher Animal","Show Animals","Go back"]
+        animal_menu = ["Buy Animal","Feed Animal","Send to Butcher","Show Animals","Go back"]
         for idx,option in enumerate(animal_menu, start=1):
             print(f"{idx}.{option}")
         try:
@@ -207,6 +232,8 @@ class Game:
                 self.buy_animals()
             elif option_selected == 2:
                 self.feed_animals()
+            elif option_selected == 3:
+                return
             elif option_selected == 4:
                 self.show_animals()
             elif option_selected == 5:
@@ -217,14 +244,19 @@ class Game:
             print("Invalid input. Please enter a number.")
 
     def show_animals(self):
+        clear_screen()
         if not self.animals:
             print("You don't own any Animals yet.")
         else:
             print("\nList of Animals:")
             for i, animal in enumerate(self.animals, start=1):
-                print(f"Animal {i}: {animal.animal_type}\nAge: {animal.age}\n{animal.progress_bar()}\n{animal.hunger}")
+                animal.reduce_hunger()
+                print(f"Animal {i}: {animal.animal_type} || Age: {animal.age} || Hunger: {animal.progress_bar()}")
+                if animal.hunger <= 0:
+                    self.animals.remove(animal)
 
     def feed_animals(self):
+        clear_screen()
         if not self.animals:
             print("You dont have any animals to feed.")
         else:
@@ -242,6 +274,7 @@ class Game:
                     print("Invalid input. Please enter a number.")
 
     def buy_animals(self):
+        clear_screen()
         print("\nYou're buying a new animal.")
         animal_type = ["Cow","Pig"]
         for idx,option in enumerate(animal_type, start=1):
@@ -251,16 +284,14 @@ class Game:
         if option_selected == 1:
             if self.money >= animal_cost:
                 self.money -= animal_cost
-                new_animal = Animals(age=1,animal_type="Cow")
-                new_animal.reduce_hunger()
+                new_animal = Animals(age=1,hunger=100,animal_type="Cow")
                 self.animals.append(new_animal)
                 print(f"{new_animal.animal_type} purchased successfully!")
                 print(f"Funds reduced by {animal_cost} and your bank account is now {self.money}")
         elif option_selected == 2:
             if self.money >= animal_cost:
                 self.money -= animal_cost
-                new_animal = Animals(age=1, animal_type="Pig")
-                new_animal.reduce_hunger()
+                new_animal = Animals(age=1,hunger=100,animal_type="Pig")
                 self.animals.append(new_animal)
                 print(f"{new_animal.animal_type} purchased successfully!")
                 print(f"Funds reduced by {animal_cost} and your bank account is now {self.money}")
