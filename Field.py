@@ -1,6 +1,17 @@
+import random
 from datetime import datetime, timedelta
 
 class Field:
+
+    CROP_GROWTH_TIMES = {
+        'Wheat':200,
+        'Corn':100,
+        'Canola':400,
+        'Barley':50,
+        'Potato':600,
+        'Grapes':200
+    }
+
     def __init__(self, name="Unused Field", growtime=0, value=0, crop_type=None,plant_time=None):
         self.name = name
         self.growtime = growtime
@@ -8,23 +19,14 @@ class Field:
         self.crop_type = crop_type
         self.plant_time = plant_time
 
-    def plant_crops(self, crop_type):
+    def plant_crops(self, crop_type: str) -> None:
+        """Plant crops of the specified type in the field."""
+        self.name = crop_type + " Field"
         self.crop_type = crop_type
         self.plant_time = datetime.now()
-        if crop_type == "Wheat":
-            self.growtime = 200
-        elif crop_type == "Corn":
-            self.growtime = 100
-        elif crop_type == "Canola":
-            self.growtime = 400
-        elif crop_type == "Barley":
-            self.growtime = 50
-        elif crop_type == "Potatoes":
-            self.growtime = 600
-        elif crop_type == "Grapes":
-            self.growtime = 200
-        else:
-            self.growtime = 0
+        self.growtime = self.CROP_GROWTH_TIMES.get(crop_type, 0)
+        if not self.growtime:
+            print(f"Invalid crop type: {crop_type}. No crops planted.")
 
     def is_ready_to_harvest(self):
         if self.plant_time is None:

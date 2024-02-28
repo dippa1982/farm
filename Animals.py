@@ -1,72 +1,87 @@
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
+import random
 
 class Animals:
-    def __init__(self,age,hunger,animal_type):
+    """Class to represent farm animals."""
+
+    HUNGER_THRESHOLD = 30
+    OLD_AGE_THRESHOLD = 10
+    HUNGER_DECAY_RATE = 0.1
+
+    def __init__(self, age: int, hunger: int, species: str):
         self.age = age
         self.hunger = hunger
-        self.animal_type = animal_type
+        self.species = species
         self.last_fed_time = datetime.now()
-        self.last_milk_time = datetime.now()
-        self.last_age_increment_time = datetime.now()
 
-    def milk(self):
-        if self.animal_type == "Cow":
+    def milk(self) -> int:
+        """Simulate milking the animal and return the amount of milk produced."""
+        if self.species == "Cow":
             current_time = datetime.now()
             milk_time = current_time - timedelta(hours=1)
-            if milk_time >= self.last_milk_time:
-                print("Milking Cow")
-                self.last_milk_time = current_time
+            if milk_time >= self.last_fed_time:
+                milk_amount = random.randint(50, 100)
+                print(f"Milking Cow. Produced {milk_amount}kg of milk.")
+                self.last_fed_time = current_time
+                return milk_amount
             else:
                 print("Cow not ready for milking")
+                return 0
         else:
             print("No cows to milk")
+            return 0
 
-    def age_one_year(self):
+    def age_one_year(self) -> None:
+        """Simulate the animal aging by one year."""
         current_time = datetime.now()
-        one_hour_ago = current_time - timedelta(minutes=20)
-        if one_hour_ago >= self.last_age_increment_time:
+        one_hour_ago = current_time - timedelta(hours=1)
+        if one_hour_ago >= self.last_fed_time:
             self.age += 1
-            self.last_age_increment_time = current_time
-            if self.age >= 10:
+            self.last_fed_time = current_time
+            if self.age >= self.OLD_AGE_THRESHOLD:
                 self.die()
 
-    def butcher(self):
-        if self.animal_type == "Cow":
-            meat_amount = 50  # Adjust as needed
+    def butcher(self) -> int:
+        """Simulate butchering the animal and return the amount of meat produced."""
+        if self.species == "Cow":
+            meat_amount = 50
             print(f"Butchering {meat_amount}kg of beef from the cow.")
             return meat_amount
-        elif self.animal_type == "Pig":
-            meat_amount = 30  # Adjust as needed
+        elif self.species == "Pig":
+            meat_amount = 30
             print(f"Butchering {meat_amount}kg of pork from the pig.")
             return meat_amount
         else:
             print("Cannot butcher this animal type.")
             return 0
 
-    def feed(self):
-        if self.hunger <= 30:
+    def feed(self) -> None:
+        """Feed the animal, resetting its hunger level."""
+        if self.hunger <= self.HUNGER_THRESHOLD:
             self.hunger = 100
             self.last_fed_time = datetime.now()
-            print(f"{self.animal_type} has been fed.")
+            print(f"{self.species} has been fed.")
         else:
-            print(f"{self.animal_type} doent need feeding\n Hunger levels are {self.hunger}")
+            print(f"{self.species} doesn't need feeding")
 
-    def reduce_hunger(self):
+    def reduce_hunger(self) -> None:
+        """Reduce the animal's hunger level over time."""
         current_time = datetime.now()
         time_since_last_fed = current_time - self.last_fed_time
-        hunger_reduction_rate = 0.1
-        self.hunger -= hunger_reduction_rate * time_since_last_fed.total_seconds()
+        self.hunger -= self.HUNGER_DECAY_RATE * time_since_last_fed.total_seconds()
         self.hunger = max(0, self.hunger)  # Ensure hunger doesn't go below 0
         if self.hunger == 0:
             self.die()
 
-    def die(self):
+    def die(self) -> None:
+        """Handle the death of the animal."""
         if self.hunger == 0:
-            print(f"The {self.animal_type} has died of starvation.")
-        elif self.age >= 10:
-            print(f"The {self.animal_type} has died of old age.")
+            print(f"The {self.species} has died of starvation.")
+        elif self.age >= self.OLD_AGE_THRESHOLD:
+            print(f"The {self.species} has died of old age.")
 
-    def progress_bar(self):
+    def progress_bar(self) -> str:
+        """Generate a progress bar representing the animal's hunger level."""
         if self.hunger == 0:
             return "Animal is Dead"
         else:
