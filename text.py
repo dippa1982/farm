@@ -1,17 +1,21 @@
 import os
 import random
 import time
-import tkinter as tk
 from datetime import datetime
 import json
 from Field import Field
 from Animals import Animals
+import tkinter as tk
 
 class DateTimeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
             return obj.isoformat()
         return super().default(obj)
+
+def clear_screen():
+    time.sleep(2)
+    os.system("cls")
 
 class Game:
     def __init__(self):
@@ -29,11 +33,6 @@ class Game:
                 if option in valid_options:
                     return option
             print("Invalid input. Please enter a valid option.")
-
-    def start(self):
-        print("Welcome to Farm Life 2024")
-        print("Your father has left you his farm to take over but you have nothing on it and no harvested crops to keep you going.")
-        print("You have been given £10,000 in your will to get the farm up and running again.")
 
     def save_game(self, filename):
         game_state = {
@@ -107,9 +106,24 @@ class Game:
     def manage_fields(self,frame2):
         field_menu = ["Buy Field", "Show Field Progress", "Plant Fields", "Harvest Field", "Back to Main Menu"]
         print("\nField Management:")
-        for option in field_menu:
-            button = tk.Button(frame2, text=option, command=lambda option=option: self.handle_field_menu(option))
-            button.pack()
+        for idx, option in enumerate(field_menu, start=1):
+            buttons = tk.Button(frame2, text=option, command=lambda option=option: self.handle_field_menu(option))
+            buttons.pack()
+        
+    def handle_field_menu(self, option):
+        if option == "Buy Field":
+            self.buy_field()
+        elif option == "Show Field Progress":
+            self.show_fields()
+        elif option == "Plant Fields":
+            self.plant_crops()
+        elif option == "Harvest Field":
+            self.harvest_field()
+        elif option == "Back to Main Menu":
+            # Handle going back to the main menu
+            pass  # You can implement this part according to your application logic
+        else:
+            print("Invalid selection. Please choose a valid option.")
 
     def buy_field(self):
         print("\nYou're buying a field.")
@@ -129,7 +143,7 @@ class Game:
         else:
             print("\nList of Fields:")
             for i, field in enumerate(self.fields, start=1):
-                print(f"Field {i}: {field.name}: {field.growtime}: {field.progress_bar()}")
+                print(f"Field {i}: {field.name}: {field.crop_type}: {field.growtime}: {field.progress_bar()}")
 
     def plant_crops(self):
         if not self.fields:
@@ -227,7 +241,7 @@ class Game:
 
     def milk_cows(self):
         if not self.animals:
-            print("You don't own any cows yet.")
+            print("You don't own any animals yet.")
         else:
             for animal in self.animals:
                 animal.milk()
@@ -238,7 +252,7 @@ class Game:
         else:
             for animal in self.animals:
                 animal.butcher()
-                if animal.meat_amount > 0:
+                if  > 0:
                     self.inventory(meat_amount)
 
     def feed_animals(self):
@@ -331,7 +345,3 @@ class Game:
             print(f"{meat.capitalize()}: {quantity}kg")
         for crop, quantity in self.silo.items():
             print(f"{crop.capitalize()}: {quantity}kg")
-
-if __name__ == "__main__":
-    gui= FarmGameGUI()
-    gui.mainloop()

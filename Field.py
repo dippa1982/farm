@@ -2,7 +2,15 @@ import random
 from datetime import datetime, timedelta
 
 class Field:
+    """Crop type variables"""
+    WHEAT = 'Wheat'
+    CORN = 'Corn'
+    CANOLA = 'Canola'
+    BARLEY = 'Barley'
+    POTATO = 'Potato'
+    GRAPES = 'Grapes'
 
+    """Groth time for crop types"""
     CROP_GROWTH_TIMES = {
         'Wheat':200,
         'Corn':100,
@@ -12,13 +20,15 @@ class Field:
         'Grapes':200
     }
 
-    def __init__(self, name="Unused Field", growtime=0, value=0, crop_type=None,plant_time=None):
+    def __init__(self, name="Unused Field", growtime=0, value=0, crop_type=None,plant_time=None,fertilized=False):
         self.name = name
         self.growtime = growtime
         self.value = value
         self.crop_type = crop_type
         self.plant_time = plant_time
+        self.fertilized = fertilized
 
+    """Plant crops to selected field"""
     def plant_crops(self, crop_type: str) -> None:
         """Plant crops of the specified type in the field."""
         self.name = crop_type + " Field"
@@ -28,6 +38,7 @@ class Field:
         if not self.growtime:
             print(f"Invalid crop type: {crop_type}. No crops planted.")
 
+    """Check if crop is ready to harvest"""
     def is_ready_to_harvest(self):
         if self.plant_time is None:
             return False
@@ -36,10 +47,12 @@ class Field:
             time_elapsed = current_time - self.plant_time
             return time_elapsed.total_seconds() >= self.growtime
 
+    """Harvest crop from field"""
     def harvest(self):
             self.plant_time = None
             return self.value
 
+    """Possible Random event when crop is harvested"""
     def random_event(self):
         event_option = random.randint(1,2)
         if event_option == 1:
@@ -51,6 +64,7 @@ class Field:
             self.plant_time = None
             self.crop_type = None
 
+    """Progress bar to show progress of crops"""
     def progress_bar(self):
         if self.plant_time is None:
             return "No crops planted"

@@ -3,7 +3,6 @@ import random
 
 class Animals:
     """Class to represent farm animals."""
-
     HUNGER_THRESHOLD = 30
     OLD_AGE_THRESHOLD = 10
     HUNGER_DECAY_RATE = 0.1
@@ -46,10 +45,12 @@ class Animals:
         if self.species == "Cow":
             meat_amount = 50
             print(f"Butchering {meat_amount}kg of beef from the cow.")
+            self.add_to_inventory("beef", meat_amount)
             return meat_amount
         elif self.species == "Pig":
             meat_amount = 30
             print(f"Butchering {meat_amount}kg of pork from the pig.")
+            self.add_to_inventory("pork", meat_amount)
             return meat_amount
         else:
             print("Cannot butcher this animal type.")
